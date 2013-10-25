@@ -105,7 +105,7 @@ function sync {
   acquire_remote_lock
 
   info
-  info "\x1b\x5b1;32mbitpocket started\x1b\x5b0m at `date`."
+  info "bitpocket started at `date`."
   info
 
   # Fire off slow sync start notifier in background
@@ -174,7 +174,7 @@ function sync {
 
   cleanup
   info
-  info "\x1b\x5b1;32mbitpocket finished\x1b\x5b0m at `date`."
+  info "bitpocket finished at `date`."
   info
 }
 
@@ -272,7 +272,7 @@ function acquire_lock {
       error "There's already an instance of BitPocket syncing this directory. Exiting."
       exit 1
     else
-      error "\x1b\x5b1;31mbitpocket error:\x1b\x5b0m Bitpocket found a stale lock directory:"
+      error "\x1b\x5b1;31mbitpocket error: Bitpocket found a stale lock directory:"
       error "  | Root dir: $(pwd)"
       error "  | Lock dir: $LOCK_DIR"
       error "  | Command:  LOCK_PATH=$(pwd)/$LOCK_DIR && rm \$LOCK_PATH/pid && rmdir \$LOCK_PATH"
@@ -333,22 +333,22 @@ function die {
 
 # List all files in the sync set
 function list {
-  info "\x1b\x5b1;32mbitpocket\x1b\x5b0m will sync the following files:"
+  info "bitpocket will sync the following files:"
   rsync -av --list-only --exclude "/$DOT_DIR"  $USER_RULES . | grep "^-\|^d" \
       | sed "s:^\S*\s*\S*\s*\S*\s*\S*\s*:/:" | sed "s:^/\.::" | sort
 }
 
 function info {
-    echo -e $1
+    echo $1
     if [ "$1" != "" ]; then
-        echo -e $1 | logger -p local7.info -t "[bitpocket]"
+        echo $1 | logger -p local7.info -t "[bitpocket]"
     fi
 }
 
 function error {
-    echo -e $1
+    echo $1
     if [ "$1" != "" ]; then
-        echo -e $1 | logger -p local7.error -t "[bitpocket]"
+        echo $1 | logger -p local7.error -t "[bitpocket]"
     fi
 }
 
