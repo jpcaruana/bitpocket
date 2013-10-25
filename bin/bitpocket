@@ -254,7 +254,7 @@ function on_slow_sync_stop {
 }
 
 function cron {
-  DISPLAY=:0.0 sync 2>&1 | logger -p local7.info -t "[bitpocket.cron]"
+  DISPLAY=:0.0 sync 2>&1 | logger -p local7.info -t "[bitpocket.cron:$USER]"
 }
 
 function acquire_lock {
@@ -334,14 +334,14 @@ function list {
 function info {
     echo $1
     if [ "$1" != "" ]; then
-        echo $1 | logger -p local7.info -t "[bitpocket]"
+        echo $1 | logger -p local7.info -t "[bitpocket:$USER]"
     fi
 }
 
 function error {
     echo $1
     if [ "$1" != "" ]; then
-        echo $1 | logger -p local7.error -t "[bitpocket]"
+        echo $1 | logger -p local7.error -t "[bitpocket:$USER]"
     fi
 }
 
