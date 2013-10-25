@@ -20,9 +20,9 @@ RSYNC_RSH="ssh"
 # Test for GNU versions of core utils. Bail if non-GNU.
 sed --version >/dev/null 2>/dev/null
 if [ $? -ne 0 ]; then
-    info "fatal: It seems like you are running non-GNU versions of coreutils."
-    info "       It is currently unsafe to use bitpocket with this setup,"
-    info "       so I'll have to stop here. Sorry ..."
+    error "fatal: It seems like you are running non-GNU versions of coreutils."
+    error "       It is currently unsafe to use bitpocket with this setup,"
+    error "       so I'll have to stop here. Sorry ..."
     exit 1
 fi
 
@@ -61,12 +61,12 @@ export RSYNC_RSH
 
 function init {
   if [[ -d "$DOT_DIR" || -f "$CFG_FILE" ]]; then
-    info "fatal: Current directory already initialized for bitpocket"
+    error "fatal: Current directory already initialized for bitpocket"
     exit 128
   fi
 
   if [[ $# != 2 ]]; then
-    info "usage: bitpocket init <REMOTE_HOST> <REMOTE_PATH>"
+    error "usage: bitpocket init <REMOTE_HOST> <REMOTE_PATH>"
     exit 128
   fi
 
@@ -185,7 +185,7 @@ function pack {
 
     # Git is required for backup packing
     if [ ! `builtin type -p git` ]; then
-        info "fatal: For backup packing, git must be installed"
+        error "fatal: For backup packing, git must be installed"
         exit 128
     fi
 
@@ -269,14 +269,14 @@ function acquire_lock {
     kill -0 $(cat "$LOCK_DIR/pid") &>/dev/null
 
     if [[ $? == 0 ]]; then
-      info "There's already an instance of BitPocket syncing this directory. Exiting."
+      error "There's already an instance of BitPocket syncing this directory. Exiting."
       exit 1
     else
-      info "\x1b\x5b1;31mbitpocket error:\x1b\x5b0m Bitpocket found a stale lock directory:"
-      info "  | Root dir: $(pwd)"
-      info "  | Lock dir: $LOCK_DIR"
-      info "  | Command:  LOCK_PATH=$(pwd)/$LOCK_DIR && rm \$LOCK_PATH/pid && rmdir \$LOCK_PATH"
-      info "Please remove the lock directory and try again."
+      error "\x1b\x5b1;31mbitpocket error:\x1b\x5b0m Bitpocket found a stale lock directory:"
+      error "  | Root dir: $(pwd)"
+      error "  | Lock dir: $LOCK_DIR"
+      error "  | Command:  LOCK_PATH=$(pwd)/$LOCK_DIR && rm \$LOCK_PATH/pid && rmdir \$LOCK_PATH"
+      error "Please remove the lock directory and try again."
       exit 2
     fi
   fi
@@ -292,7 +292,7 @@ function acquire_remote_lock {
   $REMOTE_RUNNER "mkdir -p \"$REMOTE_TMP_DIR\"; cd \"$REMOTE_PATH\" && mkdir \"$LOCK_DIR\" 2>/dev/null"
 
   if [[ $? != 0 ]]; then
-    info "Couldn't acquire remote lock. Another client is syncing with $REMOTE or lock file couldn't be created. Exiting."
+    error "Couldn't acquire remote lock. Another client is syncing with $REMOTE or lock file couldn't be created. Exiting."
     release_lock
     exit 3
   fi
@@ -304,7 +304,7 @@ function release_remote_lock {
 
 function assert_dotdir {
   if [ ! -d "$DOT_DIR" ]; then
-    info "fatal: Not a bitpocket directory. Try 'bitpocket help' for usage."
+    error "fatal: Not a bitpocket directory. Try 'bitpocket help' for usage."
     exit 128
   fi
   mkdir -p "$TMP_DIR"
@@ -327,7 +327,7 @@ function die {
   cleanup
   bring_the_children_let_me_kill_them
 
-  info "fatal: command failed $1"
+  error "fatal: command failed $1"
   exit 128
 }
 
@@ -342,6 +342,13 @@ function info {
     echo -e $1
     if [ "$1" != "" ]; then
         echo -e $1 | logger -p local7.info -t "[bitpocket]"
+    fi
+}
+
+function error {
+    echo -e $1
+    if [ "$1" != "" ]; then
+        echo -e $1 | logger -p local7.error -t "[bitpocket]"
     fi
 }
 
